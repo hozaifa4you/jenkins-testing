@@ -1,6 +1,6 @@
 stage('Run Backend Deploy') {
     when {
-        branch 'main'
+        branch 'master'
     }
     steps {
         dir('backend') {
@@ -12,7 +12,7 @@ stage('Run Backend Deploy') {
 
 stage('Run Frontend Deploy') {
     when {
-        branch 'main'
+        branch 'master'
     }
     steps {
         dir('frontend') {
