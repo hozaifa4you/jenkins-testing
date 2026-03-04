@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPush()
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -8,33 +12,29 @@ pipeline {
             }
         }
 
-        stage('Backend Deploy') {
+        stage('Deploy') {
             when { branch 'main' }
-            steps {
-                dir('backend') {
-                    sh 'chmod +x deploy.sh'
-                    sh './deploy.sh'
+            parallel {
+                stage('Backend') {
+                    steps {
+                        dir('backend') {
+                            sh 'chmod +x deploy.sh && ./deploy.sh'
+                        }
+                    }
                 }
-            }
-        }
-
-        stage('Frontend Deploy') {
-            when { branch 'main' }
-            steps {
-                dir('frontend') {
-                    sh 'chmod +x deploy.sh'
-                    sh './deploy.sh'
+                stage('Frontend') {
+                    steps {
+                        dir('frontend') {
+                            sh 'chmod +x deploy.sh && ./deploy.sh'
+                        }
+                    }
                 }
             }
         }
     }
 
     post {
-        success {
-            echo '✅ Deployment completed successfully!'
-        }
-        failure {
-            echo '❌ Deployment failed! Frontend skipped if backend fails.'
-        }
+        success { echo 'Deployment completed successfully!' }
+        failure  { echo 'Deployment failed!' }
     }
 }
