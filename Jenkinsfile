@@ -11,10 +11,15 @@ pipeline {
         stage("SonarQube Analysis"){
             steps {
                 withSonarQubeEnv('devops sonarqube') {
-                    script {
-                        def scannerHome = tool 'sonar-scanner'
-                        sh "${scannerHome}/bin/sonar-scanner"
-                    }
+                    sh '''
+                        if ! command -v sonar-scanner &> /dev/null; then
+                            export SONAR_SCANNER_VERSION=6.2.1.4610
+                            curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux-x64.zip
+                            unzip -q /tmp/sonar-scanner.zip -d /tmp/
+                            export PATH="/tmp/sonar-scanner-${SONAR_SCANNER_VERSION}-linux-x64/bin:$PATH"
+                        fi
+                        sonar-scanner
+                    '''
                 }
             }
         }
